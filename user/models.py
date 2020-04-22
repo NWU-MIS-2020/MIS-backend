@@ -5,14 +5,14 @@ from django.dispatch import receiver
 
 from plan.models import FieldOfStudy
 
-# from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 
 # Create your models here.
 
-# @receiver(post_save, sender=User, dispatch_uid="创建之后要自动生成令牌")
-# def create_auth_token(sender, instance=None, created=False, **kwargs):
-#     if created:
-#         Token.objects.create(user=instance)
+@receiver(post_save, sender=User, dispatch_uid="创建之后要自动生成令牌")
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
 
 class Teacher(models.Model):
     user = models.ForeignKey(User, models.CASCADE, verbose_name="账户")
