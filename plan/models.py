@@ -52,7 +52,7 @@ class OfferingCourse(models.Model):
 
 
 class RoughRequirement(models.Model):
-    index = models.IntegerField("序号", unique=True)
+    index = models.IntegerField("序号")
     title = models.CharField("标题", max_length=50)
     description = models.TextField("描述", blank=True)
     full_indicator = models.FloatField(default=1.0, verbose_name="总指标值")
@@ -65,8 +65,8 @@ class RoughRequirement(models.Model):
         verbose_name = verbose_name_plural = "毕业要求"
 
 class DetailedRequirement(models.Model):
-    rough_requirement = models.ForeignKey(RoughRequirement, models.CASCADE, "detailed_requirements", verbose_name="毕业要求")
-    index = models.IntegerField(verbose_name="子序号")
+    rough_requirement = models.ForeignKey(RoughRequirement, models.PROTECT, "detailed_requirements", verbose_name="毕业要求")
+    index = models.IntegerField("子序号")
     description = models.TextField("描述", blank=True)
     full_indicator = models.FloatField(default=1.0, verbose_name="总指标值")
     indicator_warning_line = models.FloatField(default=0.65, verbose_name="预警指标值")
@@ -76,18 +76,11 @@ class DetailedRequirement(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "指标点"
-        unique_together = ["rough_requirement", "index"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["rough_requirement", "index"],
-                name='unique_detailed_requirement'
-            )
-        ]
 
 class IndicatorFactor(models.Model):
-    detailed_requirement = models.ForeignKey(DetailedRequirement, models.CASCADE, "indicator_factors",verbose_name="指标点")
+    detailed_requirement = models.ForeignKey(DetailedRequirement, models.PROTECT, "indicator_factors",verbose_name="指标点")
     field_of_study = models.ForeignKey(FieldOfStudy, models.SET_NULL, null=True, blank=True, verbose_name="专业方向")
-    offering_course = models.ForeignKey(OfferingCourse, models.CASCADE, "indicator_factors", verbose_name="课程")
+    offering_course = models.ForeignKey(OfferingCourse, models.PROTECT, "indicator_factors", verbose_name="课程")
     # full_indicator = models.FloatField(default=1.0, verbose_name="指标系数")
     factor = models.FloatField("指标系数")
 
