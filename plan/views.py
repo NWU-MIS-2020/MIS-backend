@@ -7,9 +7,9 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
 from plan.models import RoughRequirement, DetailedRequirement
+from plan.models import OfferingCourse
 from plan.serializer import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
-
-# from user.serializers import GroupSerializer
+from plan.serializer import OfferingCourseSerializer
 
 # Create your views here.
 
@@ -21,10 +21,6 @@ class Requirements(APIView):
         """
         查询毕业要求和对应指标点
         """
-        # serializer = RoughRequirementSerializer(RoughRequirement.objects.all(), many=True)
-        # return JsonResponse({"rough_requirements": serializer.data}, safe=False)
-        # serializer = DetailedRequirementSerializer(DetailedRequirement.objects.all(), many=True)
-        # return JsonResponse({"detailed_requirements": serializer.data}, safe=False)
         serializer = RequirementSerializer(RoughRequirement.objects.all(), many=True)
         return JsonResponse({"rough_requirements": serializer.data}, safe=False)
 
@@ -117,7 +113,7 @@ class DetailedRequirements(APIView):
             for data in JSONParser().parse(request)["detailed_requirements"]:
                 print(data)
                 if data.get("id", None) is not None:
-                    raise ParseError()  # 增加不能有主键
+                    raise ParseError("不能有主键")  # 增加不能有主键
                 serializer = DetailedRequirementSerializer(data=data)
                 if not serializer.is_valid():
                     raise ParseError(serializer.errors)
@@ -132,4 +128,63 @@ class DetailedRequirements(APIView):
         with transaction.atomic():
             for data in JSONParser().parse(request)["detailed_requirements"]:
                 DetailedRequirement.objects.get(id=data["id"]).delete()
+        return Response()
+
+class OfferingCourses(APIView):
+    """
+    开设课程
+    """
+    def get(self, request):
+        """
+        查询开设课程
+        """
+        # data = JSONParser().parse(request)
+        id = request.GET.get("id", None)
+        if id is None:
+            offering_courses = OfferingCourse.objects.all()
+            serializer = OfferingCourseSerializer(offering_courses, many=True)
+            return JsonResponse({"offering_courses": serializer.data}, safe=False)
+        else:
+            offering_course = get_object_or_404(OfferingCourse, id=id)
+            serializer = OfferingCourseSerializer(offering_course)
+            return JsonResponse({"offering_courses": [serializer.data]}, safe=False)
+
+    def put(self, request):
+        """
+        修改开设课程
+        """
+        res = {"offering_courses": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["offering_courses"]:
+                offering_course = get_object_or_404(OfferingCourse, id=data["id"])
+                serializer = OfferingCourseSerializer(offering_course, data=data, partial=True)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["offering_courses"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def post(self, request):
+        """
+        增加开设课程
+        """
+        res = {"offering_courses": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["offering_courses"]:
+                if data.get("id", None) is not None:
+                    raise ParseError("不能有主键")  # 增加不能有主键
+                serializer = OfferingCourseSerializer(data=data)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["offering_courses"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def delete(self, request):
+        """
+        删除开设课程
+        """
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["offering_courses"]:
+                get_object_or_404(OfferingCourse, id=data["id"]).delete()
         return Response()
