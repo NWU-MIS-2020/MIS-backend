@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from plan.models import RoughRequirement, DetailedRequirement
 from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
+from plan.models import BasisTemplate
 
 class RoughRequirementSerializer(serializers.ModelSerializer):
 
@@ -33,4 +34,9 @@ class FieldOfStudySerializer(serializers.ModelSerializer):
 class IndicatorFactorSerializer(serializers.ModelSerializer):
     class Meta:
         model = IndicatorFactor
+        fields = '__all__'
+
+class BasisTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BasisTemplate
         fields = '__all__'
