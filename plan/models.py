@@ -80,7 +80,7 @@ class IndicatorFactor(models.Model):
     detailed_requirement = models.ForeignKey(DetailedRequirement, models.PROTECT, "indicator_factors",verbose_name="指标点")
     field_of_study = models.ForeignKey(FieldOfStudy, models.SET_NULL, null=True, blank=True, verbose_name="专业方向")
     offering_course = models.ForeignKey(OfferingCourse, models.PROTECT, "indicator_factors", verbose_name="课程")
-    target = models.TextField("课程教学目标", null=True, blank=True)
+    target = models.TextField("课程教学目标", null=True, blank=True, default="")
     # full_indicator = models.FloatField(default=1.0, verbose_name="指标系数")
     factor = models.FloatField("指标系数")
 
@@ -99,7 +99,7 @@ class IndicatorFactor(models.Model):
         ]
 
 class BasisTemplate(models.Model):
-    indicator_factor = models.ForeignKey(IndicatorFactor, models.PROTECT, "basis_templates", verbose_name="支撑课程以及指标系数")
+    indicator_factor = models.ForeignKey(IndicatorFactor, models.CASCADE, "basis_templates", verbose_name="支撑课程以及指标系数")
     name = models.CharField("评价依据内容", max_length=50)
     full_marks = models.FloatField("满分值")
     def __str__(self):
