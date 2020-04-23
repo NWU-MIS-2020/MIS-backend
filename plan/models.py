@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -55,8 +57,6 @@ class RoughRequirement(models.Model):
     index = models.IntegerField("序号")
     title = models.CharField("标题", max_length=50)
     description = models.TextField("描述", blank=True)
-    full_indicator = models.FloatField(default=1.0, verbose_name="总指标值")
-    indicator_warning_line = models.FloatField(default=0.65, verbose_name="预警指标值")
 
     def __str__(self):
         return "%d: %s"%(self.id, self.title)
@@ -68,7 +68,6 @@ class DetailedRequirement(models.Model):
     rough_requirement = models.ForeignKey(RoughRequirement, models.PROTECT, "detailed_requirements", verbose_name="毕业要求")
     index = models.IntegerField("子序号")
     description = models.TextField("描述", blank=True)
-    full_indicator = models.FloatField(default=1.0, verbose_name="总指标值")
     indicator_warning_line = models.FloatField(default=0.65, verbose_name="预警指标值")
 
     def __str__(self):
@@ -81,8 +80,10 @@ class IndicatorFactor(models.Model):
     detailed_requirement = models.ForeignKey(DetailedRequirement, models.PROTECT, "indicator_factors",verbose_name="指标点")
     field_of_study = models.ForeignKey(FieldOfStudy, models.SET_NULL, null=True, blank=True, verbose_name="专业方向")
     offering_course = models.ForeignKey(OfferingCourse, models.PROTECT, "indicator_factors", verbose_name="课程")
+    target = models.TextField("课程教学目标", null=True, blank=True)
     # full_indicator = models.FloatField(default=1.0, verbose_name="指标系数")
     factor = models.FloatField("指标系数")
+
 
     def __str__(self):
         return "%s, %s, %s"%(self.detailed_requirement, self.field_of_study, self.offering_course)
@@ -96,3 +97,35 @@ class IndicatorFactor(models.Model):
                 name='unique_indicator_factor'
             )
         ]
+
+class BasisTemplate(models.Model):
+    indicator_factor = models.ForeignKey(IndicatorFactor, models.PROTECT, "basis_templates", verbose_name="支撑课程以及指标系数")
+    name = models.CharField("评价依据内容", max_length=50)
+    full_marks = models.FloatField("满分值")
+    def __str__(self):
+        return f"{self.indicator_factor}, {self.name}, {self.full_marks}"
+    class Meta:
+        verbose_name = verbose_name_plural = "评价依据模版"
+        constraints = [
+            models.CheckConstraint(check=models.Q(full_marks__gte=0), name='full_marks_gte_0'),
+        ]
+
+@receiver(post_save, sender=IndicatorFactor, dispatch_uid="创建一个成绩评价以后增加几个评价模版")
+def create_basis_templates_after_created_indicator_factor(sender, instance, created, **kwargs):
+    if not created:
+        return
+    BasisTemplate(
+        indicator_factor=instance,
+        name="平时表现",
+        full_marks=4
+    ).save()
+    BasisTemplate(
+        indicator_factor=instance,
+        name="作业",
+        full_marks=6
+    ).save()
+    BasisTemplate(
+        indicator_factor=instance,
+        name="期末试题",
+        full_marks=21
+    ).save()
