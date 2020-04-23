@@ -8,8 +8,10 @@ from rest_framework.response import Response
 
 from plan.models import RoughRequirement, DetailedRequirement
 from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
+from plan.models import BasisTemplate
 from plan.serializer import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
 from plan.serializer import OfferingCourseSerializer, FieldOfStudySerializer, IndicatorFactorSerializer
+from plan.serializer import BasisTemplateSerializer
 
 # Create your views here.
 
@@ -308,9 +310,70 @@ class IndicatorFactors(APIView):
 
     def delete(self, request):
         """
-        删除专业方向
+        删除支撑课程
         """
         with transaction.atomic():
             for data in JSONParser().parse(request)["indicator_factors"]:
                 get_object_or_404(IndicatorFactor, id=data["id"]).delete()
+        return Response()
+
+class BasisTemplates(APIView):
+    """
+    评价依据模版view
+    """
+    def get(self, request):
+        """
+        查询评价依据模版
+        """
+        data = {}
+        id = request.GET.get('id', None)
+        indicator_factor_id = request.GET.get('indicator_factor_id', None)
+        if id is not None:
+            data["id"] = id
+        if indicator_factor_id is not None:
+            data["indicator_factor_id"] = indicator_factor_id
+        # if data is None:
+        #     raise ParseError("禁止查询全部")
+        basis_templates = BasisTemplate.objects.filter(**data)
+        serializer = BasisTemplateSerializer(basis_templates, many=True)
+        return JsonResponse({"basis_templates": serializer.data}, safe=False)
+
+    def put(self, request):
+        """
+        修改评价依据模版
+        """
+        res = {"basis_templates": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["basis_templates"]:
+                basis_template = get_object_or_404(BasisTemplate, id=data["id"])
+                serializer = BasisTemplateSerializer(basis_template, data=data, partial=True)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["basis_templates"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def post(self, request):
+        """
+        增加评价依据模版
+        """
+        res = {"basis_templates": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["basis_templates"]:
+                if data.get("id", None) is not None:
+                    raise ParseError("不能有主键")  # 增加不能有主键
+                serializer = BasisTemplateSerializer(data=data)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["basis_templates"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def delete(self, request):
+        """
+        删除评价依据模版
+        """
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["basis_templates"]:
+                get_object_or_404(BasisTemplate, id=data["id"]).delete()
         return Response()
