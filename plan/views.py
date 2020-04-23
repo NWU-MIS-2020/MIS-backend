@@ -7,15 +7,15 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
 from plan.models import RoughRequirement, DetailedRequirement
-from plan.models import OfferingCourse
+from plan.models import OfferingCourse, FieldOfStudy
 from plan.serializer import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
-from plan.serializer import OfferingCourseSerializer
+from plan.serializer import OfferingCourseSerializer, FieldOfStudySerializer
 
 # Create your views here.
 
 class Requirements(APIView):
     """
-    毕业要求和对应指标点
+    毕业要求和对应指标点view
     """
     def get(self, request):
         """
@@ -26,7 +26,7 @@ class Requirements(APIView):
 
 class RoughRequirements(APIView):
     """
-    毕业要求
+    毕业要求view
     """
     def get(self, request):
         """
@@ -78,7 +78,7 @@ class RoughRequirements(APIView):
 
 class DetailedRequirements(APIView):
     """
-    指标点
+    指标点view
     """
     def get(self, request):
         """
@@ -132,7 +132,7 @@ class DetailedRequirements(APIView):
 
 class OfferingCourses(APIView):
     """
-    开设课程
+    开设课程view
     """
     def get(self, request):
         """
@@ -187,4 +187,63 @@ class OfferingCourses(APIView):
         with transaction.atomic():
             for data in JSONParser().parse(request)["offering_courses"]:
                 get_object_or_404(OfferingCourse, id=data["id"]).delete()
+        return Response()
+
+
+class FieldsOfStudy(APIView):
+    """
+    专业方向view
+    """
+    def get(self, request):
+        """
+        查询专业方向
+        """
+        id = request.GET.get("id", None)
+        if id is None:
+            fields_of_study = FieldOfStudy.objects.all()
+            serializer = FieldOfStudySerializer(fields_of_study, many=True)
+            return JsonResponse({"fields_of_study": serializer.data}, safe=False)
+        else:
+            field_of_study = get_object_or_404(FieldOfStudy, id=id)
+            serializer = FieldOfStudySerializer(field_of_study)
+            return JsonResponse({"fields_of_study": [serializer.data]}, safe=False)
+
+    def put(self, request):
+        """
+        修改专业方向
+        """
+        res = {"fields_of_study": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["fields_of_study"]:
+                field_of_study = get_object_or_404(FieldOfStudy, id=data["id"])
+                serializer = FieldOfStudySerializer(field_of_study, data=data, partial=True)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["fields_of_study"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def post(self, request):
+        """
+        增加专业方向
+        """
+        res = {"fields_of_study": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["fields_of_study"]:
+                if data.get("id", None) is not None:
+                    raise ParseError("不能有主键")  # 增加不能有主键
+                serializer = FieldOfStudySerializer(data=data)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["fields_of_study"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def delete(self, request):
+        """
+        删除专业方向
+        """
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["fields_of_study"]:
+                get_object_or_404(FieldOfStudy, id=data["id"]).delete()
         return Response()
