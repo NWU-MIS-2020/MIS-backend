@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from plan.models import RoughRequirement, DetailedRequirement
-from plan.models import OfferingCourse, FieldOfStudy
+from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
 
 class RoughRequirementSerializer(serializers.ModelSerializer):
 
@@ -28,4 +28,9 @@ class OfferingCourseSerializer(serializers.ModelSerializer):
 class FieldOfStudySerializer(serializers.ModelSerializer):
     class Meta:
         model = FieldOfStudy
+        fields = '__all__'
+
+class IndicatorFactorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IndicatorFactor
         fields = '__all__'

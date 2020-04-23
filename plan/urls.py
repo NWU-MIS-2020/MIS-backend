@@ -1,6 +1,6 @@
 from django.urls import path
 from plan.views import Requirements, RoughRequirements, DetailedRequirements
-from plan.views import OfferingCourses, FieldsOfStudy
+from plan.views import OfferingCourses, FieldsOfStudy, IndicatorFactors
 
 urlpatterns = [
     path("requirements/", Requirements.as_view()),
@@ -8,4 +8,5 @@ urlpatterns = [
     path("detailed_requirements/", DetailedRequirements.as_view()),
     path("offering_courses/", OfferingCourses.as_view()),
     path("fields_of_study/", FieldsOfStudy.as_view()),
+    path("indicator_factors/", IndicatorFactors.as_view()),
 ]

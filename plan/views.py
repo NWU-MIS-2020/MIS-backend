@@ -7,9 +7,9 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
 from plan.models import RoughRequirement, DetailedRequirement
-from plan.models import OfferingCourse, FieldOfStudy
+from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
 from plan.serializer import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
-from plan.serializer import OfferingCourseSerializer, FieldOfStudySerializer
+from plan.serializer import OfferingCourseSerializer, FieldOfStudySerializer, IndicatorFactorSerializer
 
 # Create your views here.
 
@@ -246,4 +246,71 @@ class FieldsOfStudy(APIView):
         with transaction.atomic():
             for data in JSONParser().parse(request)["fields_of_study"]:
                 get_object_or_404(FieldOfStudy, id=data["id"]).delete()
+        return Response()
+
+class IndicatorFactors(APIView):
+    """
+    支撑课程view
+    """
+    def get(self, request):
+        """
+        查询支撑课程
+        """
+        data = {}
+        id = request.GET.get('id', None)
+        detailed_requirement_id = request.GET.get('detailed_requirement_id', None)
+        offering_course_id = request.GET.get('offering_course_id', None)
+        field_of_study_id = request.GET.get('field_of_study_id', None)
+        if id is not None:
+            data["id"] = id
+        if detailed_requirement_id is not None:
+            data["detailed_requirement"] = detailed_requirement_id
+        if offering_course_id is not None:
+            data["offering_course"] = offering_course_id
+        if field_of_study_id is not None:
+            data["field_of_study"] = field_of_study_id
+        # if data is None:
+        #     raise ParseError("禁止查询全部")
+        indicator_factors = IndicatorFactor.objects.filter(**data)
+        serializer = IndicatorFactorSerializer(indicator_factors, many=True)
+        return JsonResponse({"indicator_factors": serializer.data}, safe=False)
+
+    def put(self, request):
+        """
+        修改支撑课程
+        """
+        res = {"indicator_factors": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["indicator_factors"]:
+                indicator_factor = get_object_or_404(IndicatorFactor, id=data["id"])
+                serializer = IndicatorFactorSerializer(indicator_factor, data=data, partial=True)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["indicator_factors"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def post(self, request):
+        """
+        增加支撑课程
+        """
+        res = {"indicator_factors": []}
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["indicator_factors"]:
+                if data.get("id", None) is not None:
+                    raise ParseError("不能有主键")  # 增加不能有主键
+                serializer = IndicatorFactorSerializer(data=data)
+                if not serializer.is_valid():
+                    raise ParseError(serializer.errors)
+                serializer.save()
+                res["indicator_factors"].append(serializer.data)
+        return JsonResponse(res, status=200, safe=False)
+
+    def delete(self, request):
+        """
+        删除专业方向
+        """
+        with transaction.atomic():
+            for data in JSONParser().parse(request)["indicator_factors"]:
+                get_object_or_404(IndicatorFactor, id=data["id"]).delete()
         return Response()
