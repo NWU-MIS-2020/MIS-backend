@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Course, Grade
+from .models import Course, Grade, Basis, IndicatorMark, DetailedMark
 
 # Register your models here.
 
@@ -15,5 +15,19 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Grade)
 class GradeAdmin(admin.ModelAdmin):
-    list_display = ("student", "course", "final_marks", "indicator")
+    list_display = ("student", "course", "final_marks")
     list_filter = ("course", "student")
+
+
+@admin.register(Basis)
+class BasisAdmin(admin.ModelAdmin):
+    list_display = ('id', 'indicator_factor', 'course', 'name', 'full_marks')
+
+@admin.register(IndicatorMark)
+class IndicatorMarkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'indicator_factor', 'grade', 'total_marks')
+    readonly_fields = ('total_marks',)
+
+@admin.register(DetailedMark)
+class DetailedMarkAdmin(admin.ModelAdmin):
+    list_display = ('id', 'indicator_mark', 'basis', 'marks')

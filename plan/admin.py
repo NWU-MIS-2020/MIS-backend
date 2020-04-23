@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Q
 
-from .models import RoughRequirement, DetailedRequirement, IndicatorFactor, FieldOfStudy, OfferingCourse
+from .models import RoughRequirement, DetailedRequirement, IndicatorFactor, FieldOfStudy, OfferingCourse, BasisTemplate
 
 # Register your models here.
 
@@ -56,3 +56,7 @@ class OfferingCourseAdmin(admin.ModelAdmin):
     list_display = ('number', 'name', 'course_type', "course_property", "credit", "total_period", "semester")
     list_display_links = ('number', 'name')
     list_filter = ('course_type', "course_property", "semester")
+
+@admin.register(BasisTemplate)
+class BasisTemplateAdmin(admin.ModelAdmin):
+    list_display = ('id', 'indicator_factor', 'name', 'full_marks')
