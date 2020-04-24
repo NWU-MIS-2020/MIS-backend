@@ -11,7 +11,7 @@ from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
 from plan.models import BasisTemplate
 from plan.serializers import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
 from plan.serializers import OfferingCourseSerializer, FieldOfStudySerializer, IndicatorFactorSerializer
-from plan.serializers import BasisTemplateSerializer
+from plan.serializers import BasisTemplateSerializer, ReadIndicatorFactorSerializer
 
 # Create your views here.
 
@@ -274,7 +274,7 @@ class IndicatorFactors(APIView):
         # if data is None:
         #     raise ParseError("禁止查询全部")
         indicator_factors = IndicatorFactor.objects.filter(**data)
-        serializer = IndicatorFactorSerializer(indicator_factors, many=True)
+        serializer = ReadIndicatorFactorSerializer(indicator_factors, many=True)
         return JsonResponse({"indicator_factors": serializer.data}, safe=False)
 
     def put(self, request):

@@ -32,6 +32,11 @@ class OfferingCourseSerializer(serializers.ModelSerializer):
         model = OfferingCourse
         fields = '__all__'
 
+class SimpleOfferingCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferingCourse
+        fields = ["id", "name"]
+
 class FieldOfStudySerializer(serializers.ModelSerializer):
     class Meta:
         model = FieldOfStudy
@@ -45,4 +50,12 @@ class IndicatorFactorSerializer(serializers.ModelSerializer):
 class BasisTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BasisTemplate
+        fields = '__all__'
+
+class ReadIndicatorFactorSerializer(serializers.ModelSerializer):
+    offering_course = SimpleOfferingCourseSerializer()
+    field_of_study = FieldOfStudySerializer()
+    basis_templates = BasisTemplateSerializer(many=True)
+    class Meta:
+        model = IndicatorFactor
         fields = '__all__'
