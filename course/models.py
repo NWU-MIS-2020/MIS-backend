@@ -29,8 +29,8 @@ class Course(models.Model):
         verbose_name = verbose_name_plural = "历史课程"
 
 class Grade(models.Model):
-    course = models.ForeignKey(Course, models.PROTECT, verbose_name="课程")
-    student = models.ForeignKey(Student, models.CASCADE, verbose_name="学生")
+    course = models.ForeignKey(Course, models.PROTECT, "courses", verbose_name="课程")
+    student = models.ForeignKey(Student, models.CASCADE, "grades", verbose_name="学生")
     final_marks = models.FloatField("结课分数", null=True, blank=True)
 
     def __str__(self):
@@ -119,7 +119,7 @@ def create_detailed_marks_after_created_indicator_marks(sender, instance, create
         DetailedMark(
             indicator_mark=instance,
             basis=basis
-        )
+        ).save()
 
 @receiver(post_save, sender=DetailedMark, dispatch_uid="更新一个成绩评价以后自动计算总评价值")
 def update_indicator_marks_after_updated_detailed_marks(sender, instance, created, **kwargs):
@@ -128,7 +128,7 @@ def update_indicator_marks_after_updated_detailed_marks(sender, instance, create
     indicator_mark = instance.indicator_mark
     a = b = 0.0
     for detailed_mark in indicator_mark.detailed_marks.all():
-        if a is None:
+        if detailed_mark.marks is None:
             indicator_mark.total_marks = None
             indicator_mark.save()
             return
