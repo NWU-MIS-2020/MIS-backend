@@ -20,6 +20,7 @@ class Course(models.Model):
     teachers = models.ManyToManyField(Teacher, "courses", verbose_name="负责教师")
     cms = models.ManyToManyField(CM, "courses", verbose_name="课程负责人")
     review_status = models.CharField("审核状态", choices=ReviewStatusType, default="未审核", max_length=10)
+    review_comment = models.TextField("审核人评论", null=True, blank=True, default="")
     students = models.ManyToManyField(Student, "courses", verbose_name="学生", through='course.Grade')
 
     def __str__(self):
