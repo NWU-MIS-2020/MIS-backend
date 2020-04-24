@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from plan.models import RoughRequirement, DetailedRequirement
 from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
 from plan.models import BasisTemplate
-from plan.serializer import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
-from plan.serializer import OfferingCourseSerializer, FieldOfStudySerializer, IndicatorFactorSerializer
-from plan.serializer import BasisTemplateSerializer
+from plan.serializers import RoughRequirementSerializer, DetailedRequirementSerializer, RequirementSerializer
+from plan.serializers import OfferingCourseSerializer, FieldOfStudySerializer, IndicatorFactorSerializer
+from plan.serializers import BasisTemplateSerializer
 
 # Create your views here.
 

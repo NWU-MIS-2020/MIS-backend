@@ -3,6 +3,12 @@ from plan.models import RoughRequirement, DetailedRequirement
 from plan.models import OfferingCourse, FieldOfStudy, IndicatorFactor
 from plan.models import BasisTemplate
 
+class SimpleOfferingCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferingCourse
+        fields = ['id', 'name']
+        extra_kwargs = {'name': {'required': False}}
+
 class RoughRequirementSerializer(serializers.ModelSerializer):
 
     class Meta:
