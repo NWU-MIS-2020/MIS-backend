@@ -125,7 +125,7 @@ class DetailedRequirements(APIView):
 
     def delete(self, request):
         """
-        删除毕业要求
+        删除指标点
         """
         with transaction.atomic():
             for data in JSONParser().parse(request)["detailed_requirements"]:
