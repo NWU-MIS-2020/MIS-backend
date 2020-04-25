@@ -7,7 +7,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
 from user.models import Student, Teacher, CM
-from plan.models import OfferingCourse
+from plan.models import OfferingCourse, IndicatorFactor
 
 from course.models import Course, Grade
 from course.serializers import CourseSerializer, GradeSerializer, SimpleGradeSerializer
@@ -208,3 +208,38 @@ class Grades(APIView):
             for data in JSONParser().parse(request)["courses"]:
                 get_object_or_404(Course, id=data["id"]).delete()
         return Response()
+
+class CMGrades(APIView):
+    """
+    课程负责人查询所有指标点下对应的所有学生的课程达成度(评价值)
+    老龚的需求
+    """
+    def get(self, request):
+        """
+        课程负责人查询所有指标点下对应的所有学生的课程达成度(评价值)
+        """
+        res = {
+            "detailed_requirements": []
+        }
+        course_id = request.GET.get("course_id", None)
+        course = get_object_or_404(Course, id=course_id)
+        offering_course = course.offering_course
+        for indicator_factor in offering_course.indicator_factors.all():
+            detailed_requirement = indicator_factor.detailed_requirement
+            rough_requirement = detailed_requirement.rough_requirement
+            detailed_requirement_info = {
+                "rough_requirement_index": rough_requirement.index,
+                "rough_requirement_description": rough_requirement.description,
+                "rough_requirement_title": rough_requirement.title,
+                "detailed_requirement_index": detailed_requirement.index,
+                "detailed_requirement_description": detailed_requirement.description,
+                "students_marks":[]
+            }
+            
+            for grade in course.grades.all():
+                field_of_study = grade.student.field_of_study
+                if indicator_factor.field_of_study is None or field_of_study.id == indicator_factor.field_of_study.id:
+                    indicator_mark = grade.indicator_marks.get(indicator_factor=indicator_factor)
+                    detailed_requirement_info["students_marks"].append(indicator_mark.total_marks)
+            res["detailed_requirements"].append(detailed_requirement_info)
+        return JsonResponse(res, safe=False)

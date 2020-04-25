@@ -56,6 +56,7 @@ class ReadIndicatorFactorSerializer(serializers.ModelSerializer):
     offering_course = SimpleOfferingCourseSerializer()
     field_of_study = FieldOfStudySerializer()
     basis_templates = BasisTemplateSerializer(many=True)
+    rough_requirement = serializers.IntegerField(source='detailed_requirement.rough_requirement.id')
     class Meta:
         model = IndicatorFactor
         fields = '__all__'

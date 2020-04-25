@@ -30,7 +30,7 @@ class Course(models.Model):
         verbose_name = verbose_name_plural = "历史课程"
 
 class Grade(models.Model):
-    course = models.ForeignKey(Course, models.PROTECT, "courses", verbose_name="课程")
+    course = models.ForeignKey(Course, models.PROTECT, "grades", verbose_name="课程")
     student = models.ForeignKey(Student, models.CASCADE, "grades", verbose_name="学生")
     final_marks = models.FloatField("结课分数", null=True, blank=True)
 

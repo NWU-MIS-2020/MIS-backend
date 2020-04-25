@@ -21,7 +21,7 @@ def get_predictions_by_student(student):
     student_info = {
         "username": student.user.username,
         "name": student.user.first_name,
-        "rough_predictions_info" : []
+        "rough_predictions" : []
     }
     for rough_requirement in RoughRequirement.objects.all():
         rough_prediction_info = {
@@ -47,7 +47,7 @@ def get_predictions_by_student(student):
                 detailed_prediction_info["is_lt_wil"] = True
                 rough_prediction_info["is_lt_wil"] = True
             rough_prediction_info["detailed_predictions"].append(detailed_prediction_info)
-        student_info["rough_predictions_info"].append(rough_prediction_info)
+        student_info["rough_predictions"].append(rough_prediction_info)
     return student_info
 
 class DetailedPredictions(APIView):
