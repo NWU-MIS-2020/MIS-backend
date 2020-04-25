@@ -33,7 +33,7 @@ class StudentAdmin(admin.ModelAdmin):
     name.short_description = '姓名'
     def username(self, obj):
         return obj.user.username
-    username.short_description = '工号'
+    username.short_description = '学号'
 
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):

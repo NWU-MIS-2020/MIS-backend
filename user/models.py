@@ -15,7 +15,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 class Teacher(models.Model):
-    user = models.ForeignKey(User, models.CASCADE, verbose_name="账户")
+    user = models.OneToOneField(User, models.CASCADE, "username", verbose_name="账户", primary_key=True)
 
     def __str__(self):
         return "%s(%s)"%(self.user.first_name, self.user.username)
@@ -30,7 +30,7 @@ def add_teacher_group(sender, instance=None, created=False, **kwargs):
         instance.user.groups.add(group)
 
 class Tutor(models.Model):
-    user = models.ForeignKey(User, models.CASCADE, verbose_name="账户")
+    user = models.OneToOneField(User, models.CASCADE, "username", verbose_name="账户", primary_key=True)
 
     def __str__(self):
         return "%s(%s)"%(self.user.first_name, self.user.username)
@@ -45,7 +45,7 @@ def add_tutor_group(sender, instance=None, created=False, **kwargs):
         instance.user.groups.add(group)
 
 class CM(models.Model):
-    user = models.ForeignKey(User, models.CASCADE, verbose_name="账户")
+    user = models.OneToOneField(User, models.CASCADE, "username", verbose_name="账户", primary_key=True)
 
     def __str__(self):
         return "%s(%s)"%(self.user.first_name, self.user.username)
@@ -60,7 +60,7 @@ def add_cm_group(sender, instance=None, created=False, **kwargs):
         instance.user.groups.add(group)
 
 class PM(models.Model):
-    user = models.ForeignKey(User, models.CASCADE, verbose_name="账户")
+    user = models.OneToOneField(User, models.CASCADE, "username", verbose_name="账户", primary_key=True)
 
     def __str__(self):
         return "%s(%s)"%(self.user.first_name, self.user.username)
@@ -87,8 +87,8 @@ class Squad(models.Model):
 
 
 class Student(models.Model):
-    user = models.ForeignKey(User, models.CASCADE, verbose_name="账户")
-    squad = models.ForeignKey(Squad, models.SET_NULL, verbose_name="班级", null=True)
+    user = models.OneToOneField(User, models.CASCADE, "username", verbose_name="账户", primary_key=True)
+    squad = models.ForeignKey(Squad, models.SET_NULL, "students", verbose_name="班级", null=True)
     admission_date = models.DateField(verbose_name="入学日期")
     graduation_date = models.DateField(verbose_name="毕业日期")
     length_of_schooling = models.IntegerField(default=4, verbose_name="学制")

@@ -106,7 +106,7 @@ class DetailedMark(models.Model):
     marks = models.FloatField("实际分数", null=True, blank=True, default=None)
 
     def __str__(self):
-        return f"{self.basis} {self.mark}"
+        return f"{self.basis} {self.marks}"
 
     class Meta:
         verbose_name = verbose_name_plural = "学生课程对应指标点评价值细分"
