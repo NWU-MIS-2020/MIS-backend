@@ -11,7 +11,7 @@ from user.models import Student, CM
 class DetailedPrediction(models.Model):
 
     detailed_requirement = models.ForeignKey(DetailedRequirement, models.CASCADE, verbose_name="指标点", editable=False)
-    student = models.ForeignKey(Student, models.CASCADE, verbose_name="学生", editable=False)
+    student = models.ForeignKey(Student, models.CASCADE, "detailed_predictions", verbose_name="学生", editable=False)
     indicator = models.FloatField("预测指标值", editable=False)
 
     def __str__(self):
@@ -64,7 +64,7 @@ def post_save_grade(sender, instance, **kwargs):
 
 class DetailedPredictionWarning(models.Model):
     detailed_prediction = models.OneToOneField(
-        DetailedPrediction, models.CASCADE,
+        DetailedPrediction, models.CASCADE, related_name ='detailed_prediction_warning',
         verbose_name="指标点达成度预测", editable=False
     )
 
