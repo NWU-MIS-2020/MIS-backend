@@ -131,9 +131,9 @@ class Squads(APIView):
             return JsonResponse({"squads": [serializer.data]}, safe=False)
         tutor_username = request.GET.get("tutor_username", None)
         if tutor_username is not None:
-            tutor = get_object_or_404(Tutor, user_username=tutor_username)
+            tutor = get_object_or_404(Tutor, user__username=tutor_username)
             squads = tutor.squads.all()
-            serializer = SquadSerializer(squads)
+            serializer = SquadSerializer(squads, many=True)
             return JsonResponse({"squads": serializer.data}, safe=False)
         squads = Squad.objects.all()
         serializer = SquadSerializer(squads, many=True)
