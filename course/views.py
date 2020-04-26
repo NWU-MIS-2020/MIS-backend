@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from user.models import Student, Teacher, CM
 from plan.models import OfferingCourse, IndicatorFactor
 
-from course.models import Course, Grade
+from course.models import Course, Grade, IndicatorMark, DetailedMark
 from course.serializers import CourseSerializer, GradeSerializer, SimpleGradeSerializer
 
 # Create your views here.
@@ -151,63 +151,31 @@ class Grades(APIView):
             serializer = GradeSerializer(grades, many=True)
             return JsonResponse({"grades": serializer.data}, safe=False)
 
+        course_id = request.GET.get('course_id', None)
+        if course_id is not None:
+            course = get_object_or_404(Course, id=course_id)
+            grades = course.grades.all()
+            serializer = GradeSerializer(grades, many=True)
+            return JsonResponse({"grades": serializer.data}, safe=False)
 
         raise ParseError()
 
     def put(self, request):
         """
-        修改历史课程
+        修改成绩和评价
         """
-        res = {"courses": []}
+        res = {"grades": []}
         with transaction.atomic():
-            for data in JSONParser().parse(request)["courses"]:
-                course = get_object_or_404(Course, id=data["id"])
-                if data.__contains__("offering_coures"):
-                    data["offering_course"] = get_object_or_404(OfferingCourse, id=data["offering_course"])
-                if data.__contains__("students"):
-                    students = Student.objects.filter(user__username__in=[stu["username"] for stu in data.pop("students")])
-                    course.students.set(students)
-                if data.__contains__("teachers"):
-                    teachers = Teacher.objects.filter(user__username__in=[tea["username"] for tea in data.pop("teachers")])
-                    course.teachers.set(teachers)
-                if data.__contains__("cms"):
-                    cms = CM.objects.filter(user__username__in=[cm["username"] for cm in data.pop("cms")])
-                    course.cms.set(cms)
-                course.__dict__.update(**data)
-                course.save()
-                serializer = CourseSerializer(course)
-                res["courses"].append(serializer.data)
+            for data in JSONParser().parse(request)["grades"]:
+                grade = get_object_or_404(Grade, id=data["id"])
+                for indicator_mark_info in data["indicator_marks"]:
+                    for detailed_mark_info in indicator_mark_info["detailed_marks"]:
+                        detailed_mark = get_object_or_404(DetailedMark, id=detailed_mark_info["id"])
+                        detailed_mark.marks = detailed_mark_info["marks"]
+                        detailed_mark.save()
+                serializer = GradeSerializer(grade)
+                res["grades"].append(serializer.data)
         return JsonResponse(res, status=200, safe=False)
-
-    def post(self, request):
-        """
-        增加历史课程
-        """
-        res = {"courses": []}
-        with transaction.atomic():
-            for data in JSONParser().parse(request)["courses"]:
-                if data.get("id", None) is not None:
-                    raise ParseError("不能有主键")  # 增加不能有主键
-                data["offering_course"] = get_object_or_404(OfferingCourse, id=data["offering_course"])
-                teachers = Teacher.objects.filter(user__username__in=[tea["username"] for tea in data.pop("teachers")])
-                cms = CM.objects.filter(user__username__in=[cm["username"] for cm in data.pop("cms")])
-                course = Course.objects.create(**data)
-                for student in Student.objects.filter(user__username__in=[stu["username"] for stu in data.pop("students")]):
-                    Grade.objects.create(course, student)
-                course.teachers.set(teachers)
-                course.cms.set(cms)
-                serializer = CourseSerializer(course)
-                res["courses"].append(serializer.data)
-        return JsonResponse(res, status=200, safe=False)
-
-    def delete(self, request):
-        """
-        删除成绩和评价
-        """
-        with transaction.atomic():
-            for data in JSONParser().parse(request)["courses"]:
-                get_object_or_404(Course, id=data["id"]).delete()
-        return Response()
 
 class CMGrades(APIView):
     """

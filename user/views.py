@@ -124,6 +124,17 @@ class Squads(APIView):
         """
         查询班级
         """
+        squad_id = request.GET.get("id", None)
+        if squad_id is not None:
+            squad = get_object_or_404(Squad, id=squad_id)
+            serializer = SquadSerializer(squad)
+            return JsonResponse({"squads": [serializer.data]}, safe=False)
+        tutor_username = request.GET.get("tutor_username", None)
+        if tutor_username is not None:
+            tutor = get_object_or_404(Tutor, user_username=tutor_username)
+            squads = tutor.squads.all()
+            serializer = SquadSerializer(squads)
+            return JsonResponse({"squads": serializer.data}, safe=False)
         squads = Squad.objects.all()
         serializer = SquadSerializer(squads, many=True)
         return JsonResponse({"squads": serializer.data}, safe=False)

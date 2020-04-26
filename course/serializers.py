@@ -38,15 +38,15 @@ class DetailedMarkSerializer(serializers.ModelSerializer):
     basis = BasisMarkSerializer(read_only=True)
     class Meta:
         model = DetailedMark
-        fields = ["basis", "marks"]
-        read_only_fields = ["basis"]
+        fields = ["id", "basis", "marks"]
+        read_only_fields = ["id", "basis"]
 
 class IndicatorMarkSerializer(serializers.ModelSerializer):
     detailed_marks = DetailedMarkSerializer(many=True)
     class Meta:
         model = IndicatorMark
-        fields = ["indicator_factor", "total_marks", "detailed_marks"]
-        read_only_fields = ["indicator_factor"]
+        fields = ["id", "indicator_factor", "total_marks", "detailed_marks"]
+        read_only_fields = ["id", "indicator_factor"]
 
 class GradeSerializer(serializers.ModelSerializer):
     course = SimpleCourseSerializer(read_only=True)
