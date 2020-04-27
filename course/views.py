@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from user.models import Student, Teacher, CM
 from plan.models import OfferingCourse, IndicatorFactor
 
-from course.models import Course, Grade, IndicatorMark, DetailedMark
+from course.models import Course, Grade, IndicatorMark, DetailedMark, Basis
 from course.serializers import CourseSerializer, GradeSerializer, SimpleGradeSerializer
 
 # Create your views here.
@@ -211,3 +211,24 @@ class CMGrades(APIView):
                     detailed_requirement_info["students_marks"].append(indicator_mark.total_marks)
             res["detailed_requirements"].append(detailed_requirement_info)
         return JsonResponse(res, safe=False)
+
+class StudentsGrades(APIView):
+    """
+    批量修改学生评价值
+    """
+    def put(self, request):
+        """
+        批量修改学生评价值
+        """
+        with transaction.atomic():
+            for student_info in JSONParser().parse(request)["students"]:
+                student = get_object_or_404(Student, user__username=student_info["username"])
+                for detailed_mark_info in student_info["detailed_marks"]:
+                    detailed_mark = get_object_or_404(
+                        DetailedMark,
+                        basis__id=detailed_mark_info["basis_id"],
+                        indicator_mark__grade__student=student
+                    )
+                    detailed_mark.marks = detailed_mark_info["marks"]
+                    detailed_mark.save()
+        return Response()
