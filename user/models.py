@@ -77,7 +77,7 @@ def add_pm_group(sender, instance=None, created=False, **kwargs):
 class Squad(models.Model):
     name = models.CharField("班级名", max_length=50)
     created_year = models.IntegerField("年级")
-    tutor = models.ForeignKey(Tutor, models.SET_NULL, verbose_name="导员", null=True, blank=True)
+    tutor = models.ForeignKey(Tutor, models.SET_NULL, "squads", verbose_name="导员", null=True, blank=True)
 
     def __str__(self):
         return f"{self.created_year}级 {self.name}"

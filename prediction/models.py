@@ -46,17 +46,17 @@ def post_save_grade(sender, instance, **kwargs):
     cst = 0 # 分母
     student = instance.grade.student
     detailed_requirement = instance.indicator_factor.detailed_requirement
-    for indicator_factor in detailed_requirement.indicator_factors:
+    for indicator_factor in detailed_requirement.indicator_factors.all():
         indicator_mark = IndicatorMark.objects.filter(
             grade__student=student, indicator_factor=indicator_factor
             ).order_by('grade__course__start_date').last()
-        if indicator is None or indicator_mark.total_marks is None:
+        if indicator_mark is None or indicator_mark.total_marks is None:
             continue
         a += indicator_mark.total_marks * indicator_factor.factor
         cst += 1
     if cst == 0:
         return
-    detailed_prediction = DetailedPrediction.objects.get_or_create(
+    detailed_prediction, b = DetailedPrediction.objects.get_or_create(
         student=student, detailed_requirement=detailed_requirement
     )
     detailed_prediction.indicator = a/cst # 加权平均

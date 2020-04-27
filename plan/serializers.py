@@ -56,6 +56,12 @@ class ReadIndicatorFactorSerializer(serializers.ModelSerializer):
     offering_course = SimpleOfferingCourseSerializer()
     field_of_study = FieldOfStudySerializer()
     basis_templates = BasisTemplateSerializer(many=True)
+    rough_requirement = serializers.IntegerField(source='detailed_requirement.rough_requirement.id')
+    detailed_index = serializers.IntegerField(source='detailed_requirement.index')
+    rough_index = serializers.IntegerField(source='detailed_requirement.rough_requirement.index')
+    detailed_description = serializers.CharField(source='detailed_requirement.description')
+    rough_description = serializers.CharField(source='detailed_requirement.rough_requirement.description')
+    rough_title = serializers.CharField(source='detailed_requirement.rough_requirement.title')
     class Meta:
         model = IndicatorFactor
         fields = '__all__'
